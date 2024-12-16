@@ -1,0 +1,39 @@
+int sigPin = 25; // GPIO 25 for the Grove SIG pin
+long duration, distance;
+
+void setup() {
+  Serial.begin(9600);  // Initialize serial communication
+  pinMode(sigPin, OUTPUT); // Set SIG pin as output for triggering
+}
+
+void loop() {
+  // Send ultrasonic pulse
+  digitalWrite(sigPin, LOW);
+  delayMicroseconds(2);    // Ensure low signal
+  digitalWrite(sigPin, HIGH);
+  delayMicroseconds(10);   // Send 10us pulse
+  digitalWrite(sigPin, LOW);
+
+  // Switch SIG pin to input to measure echo
+  pinMode(sigPin, INPUT);
+  duration = pulseIn(sigPin, HIGH);
+
+  // Calculate distance in cm
+  distance = (duration / 2) / 29.1; // Speed of sound: ~343 m/s
+
+  // Print the distance
+  Serial.print("Distance: ");
+  if (distance >= 2 && distance <= 400) { // Valid range for the sensor
+    Serial.print(distance);
+    Serial.println(" cm");
+  } else {
+    Serial.println("Out of range");
+  }
+
+  // Reset pin mode for the next loop iteration
+  pinMode(sigPin, OUTPUT);
+
+  // Add a small delay for stability
+  delay(500);
+}
+
