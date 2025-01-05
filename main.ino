@@ -1,0 +1,112 @@
+#include <Arduino.h>
+#if defined(ESP32)
+  #include <WiFi.h>
+#elif defined(ESP8266)
+  #include <ESP8266WiFi.h>
+#endif
+#include <Firebase_ESP_Client.h>
+
+// Provide the token generation process info.
+#include "addons/TokenHelper.h"
+// Provide the RTDB payload printing info and other helper functions.
+#include "addons/RTDBHelper.h"
+
+// Insert your network credentials
+#define WIFI_SSID "FiberHGW_HUF1RH"
+#define WIFI_PASSWORD "ykMKvf9qFNAR"
+
+// Insert Firebase project API Key
+#define API_KEY "AIzaSyAv_mGskxW-kufHJn_Zi7ivDmpC1nErU5U"
+
+// Insert RTDB URL
+#define DATABASE_URL "https://smart-bin-management-4d63f-default-rtdb.europe-west1.firebasedatabase.app/" 
+
+// Define Firebase Data object
+FirebaseData fbdo;
+
+FirebaseAuth auth;
+FirebaseConfig config;
+
+unsigned long sendDataPrevMillis = 0;
+bool signupOK = false;
+
+// Define ultrasonic sensor pin
+#define ULTRASONIC_PIN 25
+
+void setup() {
+  Serial.begin(115200);
+
+  // Initialize GPIO pin for the ultrasonic sensor
+  pinMode(ULTRASONIC_PIN, INPUT);
+
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  Serial.print("Connecting to Wi-Fi");
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print(".");
+    delay(300);
+  }
+  Serial.println();
+  Serial.print("Connected with IP: ");
+  Serial.println(WiFi.localIP());
+  Serial.println();
+
+  // Assign the API key (required)
+  config.api_key = API_KEY;
+
+  // Assign the RTDB URL (required)
+  config.database_url = DATABASE_URL;
+
+  // Sign up
+  if (Firebase.signUp(&config, &auth, "", "")) {
+    Serial.println("Firebase signup successful!");
+    signupOK = true;
+  } else {
+    Serial.printf("Firebase signup failed: %s\n", config.signer.signupError.message.c_str());
+  }
+
+  // Assign the callback function for the token generation task
+  config.token_status_callback = tokenStatusCallback;
+
+  Firebase.begin(&config, &auth);
+  Firebase.reconnectWiFi(true);
+}
+
+float readUltrasonicSensor() {
+  unsigned long duration;
+  float distance;
+
+  // Trigger the ultrasonic sensor and measure the echo time
+  pinMode(ULTRASONIC_PIN, OUTPUT);
+  digitalWrite(ULTRASONIC_PIN, LOW);
+  delayMicroseconds(2);
+  digitalWrite(ULTRASONIC_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(ULTRASONIC_PIN, LOW);
+  pinMode(ULTRASONIC_PIN, INPUT);
+  duration = pulseIn(ULTRASONIC_PIN, HIGH);
+
+  // Calculate distance in centimeters (sound speed = 343 m/s)
+  distance = (duration / 2.0) * 0.0343;
+
+  return distance;
+}
+
+void loop() {
+  if (Firebase.ready() && signupOK && (millis() - sendDataPrevMillis > 15000 || sendDataPrevMillis == 0)) {
+    sendDataPrevMillis = millis();
+
+    // Read the distance from the ultrasonic sensor
+    float distance = readUltrasonicSensor();
+    Serial.print("Distance: ");
+    Serial.print(distance);
+    Serial.println(" cm");
+
+    // Send the distance value to Firebase
+    if (Firebase.RTDB.setFloat(&fbdo, "sensor/distance", distance)) {
+      Serial.println("Data sent to Firebase successfully!");
+    } else {
+      Serial.println("Failed to send data to Firebase");
+      Serial.println("Reason: " + fbdo.errorReason());
+    }
+  }
+}
