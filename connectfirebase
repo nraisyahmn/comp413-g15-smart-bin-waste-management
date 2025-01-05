@@ -28,11 +28,17 @@ FirebaseAuth auth;
 FirebaseConfig config;
 
 unsigned long sendDataPrevMillis = 0;
-int count = 0;
 bool signupOK = false;
+
+// Define ultrasonic sensor pin
+#define ULTRASONIC_PIN 25
 
 void setup(){
   Serial.begin(115200);
+
+  // Initialize GPIO pin for the ultrasonic sensor
+  pinMode(ULTRASONIC_PIN, INPUT);
+
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.print("Connecting to Wi-Fi");
   while (WiFi.status() != WL_CONNECTED){
@@ -50,13 +56,12 @@ void setup(){
   /* Assign the RTDB URL (required) */
   config.database_url = DATABASE_URL;
 
-  /* Sign up */
-  if (Firebase.signUp(&config, &auth, "", "")){
-    Serial.println("ok");
+  // Sign up
+  if (Firebase.signUp(&config, &auth, "", "")) {
+    Serial.println("Firebase signup successful!");
     signupOK = true;
-  }
-  else{
-    Serial.printf("%s\n", config.signer.signupError.message.c_str());
+  } else {
+    Serial.printf("Firebase signup failed: %s\n", config.signer.signupError.message.c_str());
   }
 
   /* Assign the callback function for the long running token generation task */
@@ -66,30 +71,42 @@ void setup(){
   Firebase.reconnectWiFi(true);
 }
 
-void loop(){
-  if (Firebase.ready() && signupOK && (millis() - sendDataPrevMillis > 15000 || sendDataPrevMillis == 0)){
+float readUltrasonicSensor() {
+  unsigned long duration;
+  float distance;
+
+  // Trigger the ultrasonic sensor and measure the echo time
+  pinMode(ULTRASONIC_PIN, OUTPUT);
+  digitalWrite(ULTRASONIC_PIN, LOW);
+  delayMicroseconds(2);
+  digitalWrite(ULTRASONIC_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(ULTRASONIC_PIN, LOW);
+  pinMode(ULTRASONIC_PIN, INPUT);
+  duration = pulseIn(ULTRASONIC_PIN, HIGH);
+
+  // Calculate distance in centimeters (sound speed = 343 m/s)
+  distance = (duration / 2.0) * 0.0343;
+
+  return distance;
+}
+
+void loop() {
+  if (Firebase.ready() && signupOK && (millis() - sendDataPrevMillis > 15000 || sendDataPrevMillis == 0)) {
     sendDataPrevMillis = millis();
-    // Write an Int number on the database path test/int
-    if (Firebase.RTDB.setInt(&fbdo, "test/int", count)){
-      Serial.println("PASSED");
-      Serial.println("PATH: " + fbdo.dataPath());
-      Serial.println("TYPE: " + fbdo.dataType());
-    }
-    else {
-      Serial.println("FAILED");
-      Serial.println("REASON: " + fbdo.errorReason());
-    }
-    count++;
-    
-    // Write an Float number on the database path test/float
-    if (Firebase.RTDB.setFloat(&fbdo, "test/float", 0.01 + random(0,100))){
-      Serial.println("PASSED");
-      Serial.println("PATH: " + fbdo.dataPath());
-      Serial.println("TYPE: " + fbdo.dataType());
-    }
-    else {
-      Serial.println("FAILED");
-      Serial.println("REASON: " + fbdo.errorReason());
+
+    // Read the distance from the ultrasonic sensor
+    float distance = readUltrasonicSensor();
+    Serial.print("Distance: ");
+    Serial.print(distance);
+    Serial.println(" cm");
+
+    // Send the distance value to Firebase
+    if (Firebase.RTDB.setFloat(&fbdo, "sensor/distance", distance)) {
+      Serial.println("Data sent to Firebase successfully!");
+    } else {
+      Serial.println("Failed to send data to Firebase");
+      Serial.println("Reason: " + fbdo.errorReason());
     }
   }
 }
