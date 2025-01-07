@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Waste Bin Interface</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js Library -->
+    <script type="module" src="app.js"></script>
+    <!-- Link to updated JS file -->
+  </head>
+  <body>
+    <header>
+      <h1>Smart Waste Bin Monitoring System</h1>
+    </header>
+
+    <main>
+      <!-- Fill Level Section -->
+      <section id="status">
+        <h2>Fill Level: <span id="fill-level">Loading...</span></h2>
+        <p id="status-alert">Status: Checking...</p>
+      </section>
+
+      <!-- Chart Section -->
+      <section id="chart-container">
+        <canvas id="fillChart"></canvas>
+      </section>
+
+      <!-- Alarm Sound -->
+      <audio
+        id="alarm-sound"
+        src="https://www.soundjay.com/button/beep-07.wav"
+        preload="auto"
+      ></audio>
+    </main>
+  </body>
+</html>
