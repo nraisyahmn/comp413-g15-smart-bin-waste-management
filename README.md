@@ -50,9 +50,9 @@ The Smart Waste Management System is designed to monitor and manage waste levels
 ---
 
 ## Source Code
-- **Microcontroller Code:** Located in `source_code/microcontroller_code/main.ino`
-- **Cloud Functions:** Located in `source_code/cloud_functions/cloud_function.js`
-- **Dashboard:** Located in `source_code/dashboard/index.html`
+- **Microcontroller Code:** Located in `source_code/main.ino`
+- **Cloud Functions:** Located in `source_code/app.js`
+- **Dashboard:** Located in `source_code/index.html`
 
 ---
 
@@ -66,7 +66,7 @@ The detailed report of the project, including the system design, implementation,
 Watch the project demo video here: [Demo Video](demo/demo_video.mp4)
 
 ## Live Dashboard
-Access the live dashboard here: [Live Dashboard](live_dashboard/link_to_dashboard.com)
+Access the live dashboard here: [Live Dashboard]([live_dashboard/link_to_dashboard.com](http://127.0.0.1:5500/index.html))
 #### API Reference
 
 ```html
