@@ -63,7 +63,7 @@ The detailed report of the project, including the system design, implementation,
 ![Dashboard Preview](images/dashboard_image.png)
 
 ## Demo
-Watch the project demo video here: [Demo Video](demo/demo_video.mp4)
+Watch the project demo video here: [Demo Video](https://drive.google.com/drive/folders/13R2-zGZBsYkl5_1635Ux4SJKwuVip9OV)
 
 ## Live Dashboard
 Access the live dashboard here: [Live Dashboard]([live_dashboard/link_to_dashboard.com](http://127.0.0.1:5500/index.html))
