@@ -60,7 +60,9 @@ The Smart Waste Management System is designed to monitor and manage waste levels
 The detailed report of the project, including the system design, implementation, and results, can be found in the `documentation/smart_waste_management_report.pdf`.
 
 # Image
-![Dashboard Preview](images/dashboard_image.png)
+![Dashboard Preview] ![dashboard_preview](https://github.com/user-attachments/assets/1ad43a80-97c3-4aab-b996-a6fd82a16ce7)
+
+
 
 ## Demo
 Watch the project demo video here: [Demo Video](https://drive.google.com/drive/folders/13R2-zGZBsYkl5_1635Ux4SJKwuVip9OV)
